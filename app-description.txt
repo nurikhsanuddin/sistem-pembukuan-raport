@@ -1,0 +1,15 @@
+Rancangan sistem pembukuan raport yang dapat Anda implementasikan dengan Laravel 11 dan MySQL,
+dengan asumsi sistem akan menerima file Excel per kelas per semester, memproses data secara dinamis
+(termasuk mata pelajaran yang bisa berbeda-beda per kelas/siswa), dan mengagregasi data raport per siswa dari semester 1 sampai 6 menjadi satu buku raport. 
+Rancangan sistem ini mengutamakan fleksibilitas dan skalabilitas,
+
+sistem ini menggunakan maatwebsite/excel untuk melakukan import excel  dan laravel dengan blade dan tailwind menggunakan library flowbite
+
+taham import :
+1. tahap pertama melakuakan mapping dinamis untuk mendeteksi nama-nama mata pelajaran dari header kolom, sehingga jika ada mata pelajaran baru,
+maka record pada tabel subjects dibuat secara otomatis.
+2. tahap kedua melakukan iterasi untuk setiap baris data siswa.Validasi bahwa setiap baris memiliki data yang lengkap (NIS, Nama, dan nilai untuk masing-masing mata pelajaran).
+3. Lakukan mapping dinamis untuk mendeteksi nama-nama mata pelajaran dari header kolom, sehingga jika ada mata pelajaran baru, maka record pada tabel subjects dibuat secara otomatis.
+4. lalu menyimpan data siswa pada tabel students
+5. lalu Buat record pada tabel report_cards untuk semester tersebut.
+6. Untuk setiap mata pelajaran, simpan nilai-nilai pada tabel report_details.
