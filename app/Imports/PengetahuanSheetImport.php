@@ -40,42 +40,50 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
         $row7 = $rows[1];
 
         $headers = [];
+        $currentGroup = null;
+
         foreach ($row6 as $index => $value) {
             if (!empty($value)) {
                 if ($value === 'PAI') {
+                    $currentGroup = 'PAI';
                     // Kolom PAI, ambil subjectnya dari row7
                     $subject = strtoupper($row7[$index]);
                     if (in_array($subject, $this->paiSubjects)) {
                         $headers[$index] = $subject;
                     }
                 } else if ($value === 'MULOK') {
-                    // Kolom MULOK
+                    $currentGroup = 'MULOK';
+                    // Kolom MULOK, ambil dari row7
                     $subject = strtoupper($row7[$index]);
-                    if (in_array($subject, $this->mulokSubjects)) {
-                        $headers[$index] = $subject;
-                    }
+                    $headers[$index] = $subject; // Simpan subject MULOK tanpa validasi
                 } else {
+                    $currentGroup = null;
                     // Mata pelajaran lain langsung dari row6
                     $headers[$index] = $value;
                 }
             } else if (!empty($row7[$index])) {
+                $subject = strtoupper($row7[$index]);
                 // Untuk kolom yang kosong di row6, cek row7
-                switch (strtoupper($row7[$index])) {
+                switch ($subject) {
                     case 'NO':
                     case 'NIS':
                     case 'NISN':
                     case 'NAMA':
                     case 'JK':
                     case 'JUMLAH':
-                        $headers[$index] = strtolower($row7[$index]);
+                        $headers[$index] = strtolower($subject);
                         break;
                     default:
-                        $headers[$index] = strtoupper($row7[$index]);
+                        if ($currentGroup === 'MULOK') {
+                            $headers[$index] = $subject;
+                        } else {
+                            $headers[$index] = strtoupper($subject);
+                        }
                 }
             }
         }
 
-        $this->headers = array_filter($headers); // Hapus empty values
+        $this->headers = array_filter($headers);
         Log::info('Processed headers:', ['headers' => $this->headers]);
     }
 
@@ -150,7 +158,8 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                     $subjectName = $key;
                     if (in_array($key, $this->paiSubjects)) {
                         $subjectName = 'PAI_' . $key;
-                    } elseif (in_array($key, $this->mulokSubjects)) {
+                    } else {
+                        // Check if the subject matches MULOK pattern (remove validation against $mulokSubjects)
                         $subjectName = 'MULOK_' . $key;
                     }
 
