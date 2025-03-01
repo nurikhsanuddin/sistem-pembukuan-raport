@@ -154,14 +154,14 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 }
 
                 if (!empty($value) && is_numeric($value) && $value >= 0 && $value <= 100) {
-                    // Check if subject is PAI or MULOK
+                    // Determine subject name based on type
                     $subjectName = $key;
                     if (in_array($key, $this->paiSubjects)) {
                         $subjectName = 'PAI_' . $key;
-                    } else {
-                        // Check if the subject matches MULOK pattern (remove validation against $mulokSubjects)
+                    } elseif (in_array($key, $this->mulokSubjects)) {
                         $subjectName = 'MULOK_' . $key;
                     }
+                    // For other subjects, use the name as is
 
                     $subject = Subject::firstOrCreate(['name' => $subjectName]);
                     $subject->addCategory($this->category);
