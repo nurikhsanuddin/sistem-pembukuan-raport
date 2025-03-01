@@ -18,10 +18,7 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
     protected $headers = [];
     protected $category = 'Pengetahuan';
     protected $scoreColumn = 'score_knowledge';
-
-    // Add configuration arrays for PAI and MULOK subjects
-    protected $paiSubjects = ['QH', 'AA', 'FIK', 'SKI'];
-    protected $mulokSubjects = ['B.Jaw', 'Coba']; // Add your MULOK subjects here
+    protected $nonSubjectColumns = ['no', 'nis', 'nisn', 'nama', 'jk', 'jumlah'];
 
     public function __construct($semester_id, $class_id)
     {
@@ -43,29 +40,43 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
         $currentGroup = null;
 
         foreach ($row6 as $index => $value) {
+            $value = trim($value);
             if (!empty($value)) {
+                //detecting value row 6 if is PAI or MULOK
                 if ($value === 'PAI') {
                     $currentGroup = 'PAI';
                     $subject = strtoupper(trim($row7[$index]));
-                    if (in_array($subject, $this->paiSubjects)) {
-                        $headers[$index] = $subject;
+                    if (!empty($subject)) {
+                        $headers[$index] = ['type' => 'PAI', 'name' => $subject];
+                        Log::info("Found PAI subject", ['index' => $index, 'subject' => $subject]);
                     }
-                } else if (strtoupper(trim($value)) === 'MULOK') {
+                    //detecting value row 6 if is MULOK
+                } else if (strtoupper($value) === 'MULOK') {
                     $currentGroup = 'MULOK';
                     $subject = trim($row7[$index]);
-                    $headers[$index] = ['type' => 'MULOK', 'name' => $subject];
-                    Log::info("Found MULOK subject", ['index' => $index, 'subject' => $subject]);
+                    if (!empty($subject)) {
+                        $headers[$index] = ['type' => 'MULOK', 'name' => $subject];
+                        Log::info("Found MULOK subject", ['index' => $index, 'subject' => $subject]);
+                    }
                 } else {
                     $currentGroup = null;
-                    $headers[$index] = $value;
+                    $headers[$index] = ['type' => 'REGULAR', 'name' => $value];
                 }
             } else if (!empty($row7[$index])) {
                 $subject = trim($row7[$index]);
                 if ($currentGroup === 'MULOK') {
                     $headers[$index] = ['type' => 'MULOK', 'name' => $subject];
                     Log::info("Found MULOK subject in row7", ['index' => $index, 'subject' => $subject]);
+                } else if ($currentGroup === 'PAI') {
+                    $headers[$index] = ['type' => 'PAI', 'name' => strtoupper($subject)];
+                    Log::info("Found PAI subject in row7", ['index' => $index, 'subject' => $subject]);
                 } else {
-                    $headers[$index] = strtoupper($subject);
+                    // Handle special columns
+                    if (in_array(strtolower($subject), $this->nonSubjectColumns)) {
+                        $headers[$index] = strtolower($subject);
+                    } else {
+                        $headers[$index] = ['type' => 'REGULAR', 'name' => strtoupper($subject)];
+                    }
                 }
             }
         }
@@ -138,42 +149,44 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
             ]);
 
             foreach ($row as $key => $value) {
-                if (in_array(strtolower($key), ['no', 'nis', 'nisn', 'nama', 'jk', 'jumlah'])) {
+                if (!is_array($key) && in_array(strtolower($key), $this->nonSubjectColumns)) {
                     continue;
                 }
 
                 if (!empty($value) && is_numeric($value) && $value >= 0 && $value <= 100) {
-                    // Check if the key is a JSON string (MULOK subject)
-                    if (str_starts_with($key, '{') && str_ends_with($key, '}')) {
-                        $headerData = json_decode($key, true);
-                        if (isset($headerData['type']) && $headerData['type'] === 'MULOK') {
-                            $subjectName = 'MULOK_' . $headerData['name'];
-                            Log::info("Processing MULOK subject", ['subject' => $subjectName, 'value' => $value]);
+                    $headerData = is_array($key) ? $key : json_decode($key, true);
+
+                    if (is_array($headerData) && isset($headerData['type'], $headerData['name'])) {
+                        switch ($headerData['type']) {
+                            case 'PAI':
+                                $subjectName = 'PAI_' . $headerData['name'];
+                                break;
+                            case 'MULOK':
+                                $subjectName = 'MULOK_' . $headerData['name'];
+                                break;
+                            default:
+                                $subjectName = $headerData['name'];
                         }
-                    } else if (in_array($key, $this->paiSubjects)) {
-                        $subjectName = 'PAI_' . $key;
-                    } else {
-                        $subjectName = $key;
+
+                        Log::info("Processing subject", [
+                            'type' => $headerData['type'],
+                            'name' => $subjectName,
+                            'value' => $value
+                        ]);
+
+                        $subject = Subject::firstOrCreate(['name' => $subjectName]);
+                        $subject->addCategory($this->category);
+
+                        ReportDetail::updateOrCreate(
+                            [
+                                'report_card_id' => $reportCard->id,
+                                'subject_id' => $subject->id,
+                            ],
+                            [
+                                $this->scoreColumn => $value
+                            ]
+                        );
                     }
-
-                    $subject = Subject::firstOrCreate(['name' => $subjectName]);
-                    $subject->addCategory($this->category);
-
-                    ReportDetail::updateOrCreate(
-                        [
-                            'report_card_id' => $reportCard->id,
-                            'subject_id' => $subject->id,
-                        ],
-                        [
-                            $this->scoreColumn => $value
-                        ]
-                    );
-
-                    Log::info("Saved {$this->category} score", [
-                        'student' => $row['nis'],
-                        'subject' => $subjectName,
-                        'value' => $value
-                    ]);
                 }
             }
         } catch (\Exception $e) {
