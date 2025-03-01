@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Predikat;
 use App\Models\ReportCard;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -131,8 +132,9 @@ class ReportCardController extends Controller
             ->where('semester_id', $semester->id)
             ->with(['reportDetails.subject', 'schoolClass'])
             ->firstOrFail();
-
-        return view('reportcard.show', compact('reportCard'));
+        $predikat = Predikat::all();
+        // dd($predikat);
+        return view('reportcard.show', compact('reportCard', 'predikat'));
     }
 
     public function destroy(ReportCard $reportCard)

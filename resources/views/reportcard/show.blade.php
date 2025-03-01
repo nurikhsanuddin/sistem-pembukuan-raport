@@ -27,9 +27,11 @@
                     <table id="scores-table" class="w-full text-sm text-left">
                         <thead>
                             <tr>
-                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Subject</th>
-                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Knowledge Score</th>
-                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Skill Score</th>
+                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Mapel</th>
+                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Nilai Pengetahuan</th>
+                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Predikat Pengetahuan</th>
+                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Skill Keterampilan</th>
+                                <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Predikat Keterampilan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -41,7 +43,24 @@
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4">{{ $detail->subject->name }}</td>
                                     <td class="px-6 py-4">{{ $detail->score_knowledge }}</td>
+                                    <td class="px-6 py-4">
+                                        @foreach ($predikat as $grade)
+                                            @if ($detail->score_knowledge >= $grade->nilai)
+                                                {{ $grade->predikat }}
+                                                @break
+                                            @endif
+                                        @endforeach
+                                    </td>
                                     <td class="px-6 py-4">{{ $detail->score_skill }}</td>
+                                    <td class="px-6 py-4">
+
+                                        @foreach ($predikat as $grade)
+                                            @if ($detail->score_skill >= $grade->nilai)
+                                                {{ $grade->predikat }}
+                                                @break
+                                            @endif
+                                        @endforeach
+                                    </td>
                                 </tr>
                                 <?php
                                 //count skill and knowledge score
