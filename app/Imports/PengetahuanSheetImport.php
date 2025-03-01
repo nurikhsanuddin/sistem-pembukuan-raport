@@ -46,41 +46,26 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
             if (!empty($value)) {
                 if ($value === 'PAI') {
                     $currentGroup = 'PAI';
-                    // Kolom PAI, ambil subjectnya dari row7
-                    $subject = strtoupper($row7[$index]);
+                    $subject = strtoupper(trim($row7[$index]));
                     if (in_array($subject, $this->paiSubjects)) {
                         $headers[$index] = $subject;
                     }
-                } else if ($value === 'MULOK') {
+                } else if (strtoupper(trim($value)) === 'MULOK') {
                     $currentGroup = 'MULOK';
-                    // Kolom Mulok, ambil subjectnya dari row7
-                    $subject = strtoupper($row7[$index]);
-                    if (in_array($subject, $this->mulokSubjects)) {
-                        $headers[$index] = $subject;
-                    }
+                    $subject = trim($row7[$index]);
+                    $headers[$index] = ['type' => 'MULOK', 'name' => $subject];
+                    Log::info("Found MULOK subject", ['index' => $index, 'subject' => $subject]);
                 } else {
                     $currentGroup = null;
-                    // Mata pelajaran lain langsung dari row6
                     $headers[$index] = $value;
                 }
             } else if (!empty($row7[$index])) {
-                $subject = strtoupper($row7[$index]);
-                // Untuk kolom yang kosong di row6, cek row7
-                switch ($subject) {
-                    case 'NO':
-                    case 'NIS':
-                    case 'NISN':
-                    case 'NAMA':
-                    case 'JK':
-                    case 'JUMLAH':
-                        $headers[$index] = strtolower($subject);
-                        break;
-                    default:
-                        if ($currentGroup === 'MULOK') {
-                            $headers[$index] = $subject;
-                        } else {
-                            $headers[$index] = strtoupper($subject);
-                        }
+                $subject = trim($row7[$index]);
+                if ($currentGroup === 'MULOK') {
+                    $headers[$index] = ['type' => 'MULOK', 'name' => $subject];
+                    Log::info("Found MULOK subject in row7", ['index' => $index, 'subject' => $subject]);
+                } else {
+                    $headers[$index] = strtoupper($subject);
                 }
             }
         }
@@ -156,14 +141,15 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 }
 
                 if (!empty($value) && is_numeric($value) && $value >= 0 && $value <= 100) {
-                    // Determine subject name based on type
-                    $subjectName = $key;
-                    if (in_array($key, $this->paiSubjects)) {
+                    // Check if the header is an array (MULOK subject)
+                    if (is_array($key) && isset($key['type']) && $key['type'] === 'MULOK') {
+                        $subjectName = 'MULOK_' . $key['name'];
+                        Log::info("Processing MULOK subject", ['subject' => $subjectName, 'value' => $value]);
+                    } else if (in_array($key, $this->paiSubjects)) {
                         $subjectName = 'PAI_' . $key;
-                    } elseif (in_array($key, $this->mulokSubjects)) {
-                        $subjectName = 'MULOK_' . $key;
+                    } else {
+                        $subjectName = $key;
                     }
-                    // For other subjects, use the name as is
 
                     $subject = Subject::firstOrCreate(['name' => $subjectName]);
                     $subject->addCategory($this->category);
