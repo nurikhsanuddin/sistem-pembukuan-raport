@@ -96,9 +96,11 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 foreach ($this->headers as $index => $header) {
                     if (
                         isset($row[$index]) && !empty($row[$index]) &&
-                        !in_array($header, ['no', 'nis', 'nama', 'jk', 'jumlah'])
+                        !in_array(is_array($header) ? $header['name'] : $header, ['no', 'nis', 'nama', 'jk', 'jumlah'])
                     ) {
-                        $processedRow[$header] = $row[$index];
+                        // Use a string key for the processedRow array
+                        $key = is_array($header) ? json_encode($header) : $header;
+                        $processedRow[$key] = $row[$index];
                     }
                 }
 
@@ -141,10 +143,13 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 }
 
                 if (!empty($value) && is_numeric($value) && $value >= 0 && $value <= 100) {
-                    // Check if the header is an array (MULOK subject)
-                    if (is_array($key) && isset($key['type']) && $key['type'] === 'MULOK') {
-                        $subjectName = 'MULOK_' . $key['name'];
-                        Log::info("Processing MULOK subject", ['subject' => $subjectName, 'value' => $value]);
+                    // Check if the key is a JSON string (MULOK subject)
+                    if (str_starts_with($key, '{') && str_ends_with($key, '}')) {
+                        $headerData = json_decode($key, true);
+                        if (isset($headerData['type']) && $headerData['type'] === 'MULOK') {
+                            $subjectName = 'MULOK_' . $headerData['name'];
+                            Log::info("Processing MULOK subject", ['subject' => $subjectName, 'value' => $value]);
+                        }
                     } else if (in_array($key, $this->paiSubjects)) {
                         $subjectName = 'PAI_' . $key;
                     } else {
