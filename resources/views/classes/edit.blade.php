@@ -4,41 +4,37 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-4">
-                        {{ __('Tambah Kelas Baru') }}
+                        {{ __('Edit Kelas') }}
                     </h2>
 
-                    @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('classes.store') }}">
+                    <form method="POST" action="{{ route('classes.update', $class) }}">
                         @csrf
+                        @method('PUT')
                         <div class="grid gap-4 mb-4">
                             <div>
                                 <x-input-label for="name" value="Nama Kelas" />
                                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                                    required />
+                                    required value="{{ $class->name }}" />
                                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
                             </div>
 
                             <div>
                                 <x-input-label for="academic_year" value="Tahun Akademik" />
                                 <x-text-input id="academic_year" name="academic_year" type="text"
-                                    class="mt-1 block w-full" required />
+                                    class="mt-1 block w-full" required value="{{ $class->academic_year }}" />
                                 <x-input-error :messages="$errors->get('academic_year')" class="mt-2" />
                             </div>
                         </div>
 
                         <div class="flex items-center gap-4">
-                            <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+                            <x-primary-button>{{ __('Update') }}</x-primary-button>
+                            <a href="{{ route('classes.create') }}"
+                                class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                                Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm mt-6 mx-2 my-2">
-                @include('classes.show')
             </div>
         </div>
     </div>

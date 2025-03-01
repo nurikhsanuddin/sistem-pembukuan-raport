@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ClassController;
+use App\Http\Controllers\PredikatController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SemesterController;
 use Illuminate\Support\Facades\Route;
@@ -17,8 +18,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
 });
+
 use App\Http\Controllers\ReportCardController;
 
 Route::middleware(['auth'])->group(function () {
@@ -33,13 +34,26 @@ Route::middleware(['auth'])->group(function () {
     // Class routes
     Route::get('/classes/create', [ClassController::class, 'create'])->name('classes.create');
     Route::post('/classes', [ClassController::class, 'store'])->name('classes.store');
+    Route::get('/classes/{class}/edit', [ClassController::class, 'edit'])->name('classes.edit');
+    Route::put('/classes/{class}', [ClassController::class, 'update'])->name('classes.update');
+    Route::delete('/classes/{class}', [ClassController::class, 'destroy'])->name('classes.destroy');
 
     // Semester routes
     Route::get('/semesters/create', [SemesterController::class, 'create'])->name('semesters.create');
     Route::post('/semesters', [SemesterController::class, 'store'])->name('semesters.store');
+    Route::delete('/semesters/{semester}', [SemesterController::class, 'destroy'])->name('semesters.destroy');
+    Route::get('/semesters/{semester}/edit', [SemesterController::class, 'edit'])->name('semesters.edit');
+    Route::put('/semesters/{semester}', [SemesterController::class, 'update'])->name('semesters.update');
+
+    Route::get('/predikat/index', [PredikatController::class, 'index'])->name('predikat.index');
+    Route::post('/predikat', [PredikatController::class, 'store'])->name('predikat.store');
+    Route::delete('/predikat/{predikat}', [PredikatController::class, 'destroy'])->name('predikat.destroy');
+    Route::get('/predikat/{predikat}/edit', [PredikatController::class, 'edit'])->name('predikat.edit');
+    Route::put('/predikat/{predikat}', [PredikatController::class, 'update'])->name('predikat.update');
 
     // List all students with their current class
     Route::get('/report-cards', [ReportCardController::class, 'index'])->name('report-cards.index');
+    // Route::get('/predikat', [PredikatController::class, 'index'])->name('predikat.index');
 
     // Show student's semesters 
     Route::get('/report-cards/{student}/semesters', [ReportCardController::class, 'showSemesters'])

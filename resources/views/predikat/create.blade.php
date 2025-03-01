@@ -4,7 +4,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <h2 class="font-semibold text-xl text-gray-800 leading-tight mb-4">
-                        {{ __('Tambah Kelas Baru') }}
+                        {{ __('Tambah Semester Baru') }}
                     </h2>
 
                     @if (session('success'))
@@ -13,21 +13,21 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('classes.store') }}">
+                    <form method="POST" action="{{ route('predikat.store') }}">
                         @csrf
                         <div class="grid gap-4 mb-4">
                             <div>
-                                <x-input-label for="name" value="Nama Kelas" />
-                                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                                <x-input-label for="number" value="Nilai" />
+                                <x-text-input id="nilai" name="nilai" type="number" class="mt-1 block w-full"
                                     required />
-                                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                                <x-input-error :messages="$errors->get('nilai')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="academic_year" value="Tahun Akademik" />
-                                <x-text-input id="academic_year" name="academic_year" type="text"
-                                    class="mt-1 block w-full" required />
-                                <x-input-error :messages="$errors->get('academic_year')" class="mt-2" />
+                                <x-input-label for="predikat" value="Deskripsi" />
+                                <x-text-input id="predikat" name="predikat" type="text" class="mt-1 block w-full"
+                                    required />
+                                <x-input-error :messages="$errors->get('predikat')" class="mt-2" />
                             </div>
                         </div>
 
@@ -38,7 +38,8 @@
                 </div>
             </div>
             <div class="bg-white rounded-lg shadow-sm mt-6 mx-2 my-2">
-                @include('classes.show')
+
+                @include('predikat.show')
             </div>
         </div>
     </div>
