@@ -19,6 +19,10 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
     protected $category = 'Pengetahuan';
     protected $scoreColumn = 'score_knowledge';
 
+    // Add configuration arrays for PAI and MULOK subjects
+    protected $paiSubjects = ['QH', 'AA', 'FIK', 'SKI'];
+    protected $mulokSubjects = ['B.Jaw', 'Coba']; // Add your MULOK subjects here
+
     public function __construct($semester_id, $class_id)
     {
         $this->semester_id = $semester_id;
@@ -40,10 +44,16 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
             if (!empty($value)) {
                 if ($value === 'PAI') {
                     // Kolom PAI, ambil subjectnya dari row7
-                    $headers[$index] = $row7[$index];
+                    $subject = strtoupper($row7[$index]);
+                    if (in_array($subject, $this->paiSubjects)) {
+                        $headers[$index] = $subject;
+                    }
                 } else if ($value === 'MULOK') {
                     // Kolom MULOK
-                    $headers[$index] = 'MULOK_' . $row7[$index];
+                    $subject = strtoupper($row7[$index]);
+                    if (in_array($subject, $this->mulokSubjects)) {
+                        $headers[$index] = $subject;
+                    }
                 } else {
                     // Mata pelajaran lain langsung dari row6
                     $headers[$index] = $value;
@@ -136,10 +146,15 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 }
 
                 if (!empty($value) && is_numeric($value) && $value >= 0 && $value <= 100) {
-                    $isPAI = in_array($key, ['QH', 'AA', 'FIK', 'SKI']);
-                    $name = $isPAI ? 'PAI_' . $key : $key;
+                    // Check if subject is PAI or MULOK
+                    $subjectName = $key;
+                    if (in_array($key, $this->paiSubjects)) {
+                        $subjectName = 'PAI_' . $key;
+                    } elseif (in_array($key, $this->mulokSubjects)) {
+                        $subjectName = 'MULOK_' . $key;
+                    }
 
-                    $subject = Subject::firstOrCreate(['name' => $name]);
+                    $subject = Subject::firstOrCreate(['name' => $subjectName]);
                     $subject->addCategory($this->category);
 
                     ReportDetail::updateOrCreate(
@@ -154,7 +169,7 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
 
                     Log::info("Saved {$this->category} score", [
                         'student' => $row['nis'],
-                        'subject' => $isPAI ? 'PAI_' . $key : $key,
+                        'subject' => $subjectName,
                         'value' => $value
                     ]);
                 }
