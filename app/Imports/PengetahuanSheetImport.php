@@ -53,9 +53,11 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                     }
                 } else if ($value === 'MULOK') {
                     $currentGroup = 'MULOK';
-                    // Kolom MULOK, ambil dari row7
+                    // Kolom Mulok, ambil subjectnya dari row7
                     $subject = strtoupper($row7[$index]);
-                    $headers[$index] = $subject; // Simpan subject MULOK tanpa validasi
+                    if (in_array($subject, $this->mulokSubjects)) {
+                        $headers[$index] = $subject;
+                    }
                 } else {
                     $currentGroup = null;
                     // Mata pelajaran lain langsung dari row6
