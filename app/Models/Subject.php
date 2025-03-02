@@ -9,7 +9,19 @@ class Subject extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'categories'];
+    protected $fillable = [
+        'name',
+        'categories',
+        'description',
+        'pengetahuan_A',
+        'pengetahuan_B',
+        'pengetahuan_C',
+        'pengetahuan_D',
+        'keterampilan_A',
+        'keterampilan_B',
+        'keterampilan_C',
+        'keterampilan_D',
+    ];
 
     protected $casts = [
         'categories' => 'array'

@@ -10,7 +10,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "laravel/framework": "^11.31",
+        "barryvdh/laravel-dompdf": "^3.1",
+        "laravel/framework": "^12.0",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "^3.1"
     },
@@ -30,7 +31,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/DateHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

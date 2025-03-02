@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ClassController;
+use App\Http\Controllers\HomeroomTeacherController;
+use App\Http\Controllers\MapelController;
 use App\Http\Controllers\PredikatController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SemesterController;
@@ -51,21 +53,40 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/predikat/{predikat}/edit', [PredikatController::class, 'edit'])->name('predikat.edit');
     Route::put('/predikat/{predikat}', [PredikatController::class, 'update'])->name('predikat.update');
 
-    // List all students with their current class
-    Route::get('/report-cards', [ReportCardController::class, 'index'])->name('report-cards.index');
-    // Route::get('/predikat', [PredikatController::class, 'index'])->name('predikat.index');
+    // Remove these individual routes since they're duplicating the resource route
+    // Route::get('/mapel/index', [MapelController::class, 'index'])->name('mapel.index');
+    // Route::post('/mapel', [MapelController::class, 'store'])->name('mapel.store');
+    // Route::delete('/mapel/{mapel}', [MapelController::class, 'destroy'])->name('mapel.destroy');
+    // Route::get('/mapel/{mapel}/edit', [MapelController::class, 'edit'])->name('mapel.edit');
+    // Route::put('/mapel/{mapel}', [MapelController::class, 'update'])->name('mapel.update');
 
-    // Show student's semesters 
-    Route::get('/report-cards/{student}/semesters', [ReportCardController::class, 'showSemesters'])
-        ->name('report-cards.semesters');
+    // Keep only this resource route
+    Route::resource('mapel', MapelController::class)->parameter('mapel', 'subject')->except([
+        'create',
+        'store',
+        'show'
+    ]);
+    Route::resource('homeroom', HomeroomTeacherController::class);
+    // Report Card Routes
+    Route::prefix('report-cards')->name('report-cards.')->group(function () {
+        Route::get('/', [ReportCardController::class, 'index'])->name('index');
+        Route::get('/upload', [ReportCardController::class, 'showUploadForm'])->name('upload');
+        Route::post('/import', [ReportCardController::class, 'import'])->name('import');
+        Route::get('/students', [ReportCardController::class, 'getStudents'])->name('students');
+        Route::get('/students/{student}/semesters', [ReportCardController::class, 'showSemesters'])->name('semesters');
+        Route::get('/students/{student}/semester/{semester}', [ReportCardController::class, 'show'])->name('show');
+        Route::delete('/{reportCard}', [ReportCardController::class, 'destroy'])->name('destroy');
+        Route::get('/class/{classId}', [ReportCardController::class, 'classStudents'])->name('class-students');
+        Route::get('/class/{classId}/export', [ReportCardController::class, 'exportClassReportCards'])->name('export-class');
+    });
 
-    // Show specific report card
-    Route::get('/report-cards/{student}/semester/{semester}', [ReportCardController::class, 'show'])
-        ->name('report-cards.show');
+    Route::get('/reportcard/class/{class}/export-pdf', [ReportCardController::class, 'exportPDF'])
+        ->name('reportcard.export-pdf');
+    Route::get('/reportcard/class/{class}/browser-print', [ReportCardController::class, 'browserPrint'])
+        ->name('reportcard.browser-print');
 
-    // Delete report card
-    Route::delete('/report-cards/{reportCard}', [ReportCardController::class, 'destroy'])
-        ->name('report-cards.destroy');
+    Route::get('/reportcard/class/{classId}/export-class', [ReportCardController::class, 'exportClassReportCards'])
+        ->name('reportcard.export-class');
 });
 
 

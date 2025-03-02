@@ -119,10 +119,11 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
             try {
                 $processedRow = [];
 
-                // Sesuaikan dengan posisi kolom di Excel
-                $processedRow['no'] = $row[0]; // Kolom A
-                $processedRow['nis'] = $row[2]; // Kolom C
-                $processedRow['nama'] = $row[3]; // Kolom D
+                // Fix column positions to match Excel file
+                $processedRow['no'] = $row[0];    // Kolom A
+                $processedRow['nis'] = $row[1];  // Kolom B - NISN should be column B
+                $processedRow['nisn'] = $row[2];   // Kolom C - NIS should be column C
+                $processedRow['nama'] = $row[3];  // Kolom D
 
                 // Proses nilai mata pelajaran
                 foreach ($this->headers as $index => $header) {
@@ -145,6 +146,7 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                     $this->processRow($processedRow);
                     Log::info('Processed student:', [
                         'nis' => $processedRow['nis'],
+                        'nisn' => $processedRow['nisn'], // Add NISN to logging
                         'nama' => $processedRow['nama']
                     ]);
                 } else {
@@ -160,10 +162,17 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
     protected function processRow(array $row)
     {
         try {
-            // Ini akan mencari siswa berdasarkan NIS, jika ada update nama, jika tidak ada create baru
+            // Ensure we have both NISN and student_no (NIS)
+            $studentData = [
+                'nisn' => $row['nisn'],
+                'name' => $row['nama'],
+                'student_no' => $row['nis']
+            ];
+
+            // Use updateOrCreate with both NISN and student_no as unique identifiers
             $student = Student::updateOrCreate(
-                ['student_no' => $row['nis']], // Kondisi pencarian
-                ['name' => $row['nama']]       // Data yang akan diupdate/create
+                ['nisn' => $row['nisn']], // Find by NISN
+                $studentData // Update or set all fields
             );
 
             // Get or create report card
@@ -204,7 +213,7 @@ class PengetahuanSheetImport implements ToCollection, WithStartRow
                 }
             }
         } catch (\Exception $e) {
-            Log::error("Error processing row for student {$row['nis']}: " . $e->getMessage());
+            Log::error("Error processing row for student NISN {$row['nisn']}: " . $e->getMessage());
             throw $e;
         }
     }

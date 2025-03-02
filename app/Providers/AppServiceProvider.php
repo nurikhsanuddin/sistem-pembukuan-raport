@@ -11,7 +11,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register DomPDF configuration
+        $this->mergeConfigFrom(
+            __DIR__ . '/../../config/dompdf.php',
+            'dompdf'
+        );
+
+        // Make sure the file exists before requiring it
+        $helperPath = app_path('Helpers/DateHelper.php');
+        if (file_exists($helperPath)) {
+            require_once $helperPath;
+        }
     }
 
     /**

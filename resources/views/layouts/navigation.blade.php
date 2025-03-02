@@ -52,6 +52,22 @@
                 <!-- Add Report Cards Menu Item -->
 
                 <li>
+                    <x-nav-link :href="route('homeroom.create')" :active="request()->routeIs('homeroom.create')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" class="lucide lucide-school">
+                            <path d="M14 22v-4a2 2 0 1 0-4 0v4" />
+                            <path
+                                d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10" />
+                            <path d="M18 5v17" />
+                            <path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6" />
+                            <path d="M6 5v17" />
+                            <circle cx="12" cy="9" r="2" />
+                        </svg>
+                        <span class="ms-3 font-medium">{{ __('Wali Kelas') }}</span>
+                    </x-nav-link>
+                </li>
+                <li>
                     <x-nav-link :href="route('classes.create')" :active="request()->routeIs('classes.create')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -95,7 +111,14 @@
                 </li>
                 <li>
                     <x-nav-link :href="route('predikat.index')" :active="request()->routeIs('predikat.index')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hash"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" class="lucide lucide-hash">
+                            <line x1="4" x2="20" y1="9" y2="9" />
+                            <line x1="4" x2="20" y1="15" y2="15" />
+                            <line x1="10" x2="8" y1="3" y2="21" />
+                            <line x1="16" x2="14" y1="3" y2="21" />
+                        </svg>
                         <span class="ms-3 font-medium">{{ __('Setting Predikat') }}</span>
                     </x-nav-link>
                 </li>
@@ -109,6 +132,18 @@
                             <path d="M9 14h6" />
                         </svg>
                         <span class="ms-3 font-medium">{{ __('Report Cards') }}</span>
+                    </x-nav-link>
+                </li>
+                <li>
+                    <x-nav-link :href="route('mapel.index')" :active="request()->routeIs('mapel.index')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" class="lucide lucide-clipboard-minus">
+                            <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                            <path d="M9 14h6" />
+                        </svg>
+                        <span class="ms-3 font-medium">{{ __('Daftar Mapel') }}</span>
                     </x-nav-link>
                 </li>
                 <li>

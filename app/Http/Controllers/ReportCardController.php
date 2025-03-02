@@ -12,12 +12,14 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\ReportCardImport;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportCardController extends Controller
 {
     public function index()
     {
-        return view('reportcard.index');
+        $classes = SchoolClass::withCount('students')->get();
+        return view('reportcard.index', compact('classes'));
     }
 
     /**
@@ -117,12 +119,25 @@ class ReportCardController extends Controller
         }
     }
 
+    /**
+     * Show the semesters for a specific student.
+     *
+     * @param \App\Models\Student $student
+     * @return \Illuminate\Http\Response
+     */
     public function showSemesters(Student $student)
     {
         $semesters = ReportCard::where('student_id', $student->id)
             ->with('semester', 'schoolClass')
             ->get();
-        // dd($semesters);
+
+        // For debugging
+        Log::info('Showing semesters for student', [
+            'student_id' => $student->id,
+            'semesters_count' => $semesters->count(),
+            'route_name' => 'report-cards.semesters'
+        ]);
+
         return view('reportcard.semesters', compact('student', 'semesters'));
     }
 
@@ -154,5 +169,44 @@ class ReportCardController extends Controller
             DB::rollBack();
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
+    }
+
+    public function classStudents($classId)
+    {
+        $class = SchoolClass::with('students')->findOrFail($classId);
+        return view('reportcard.class-students', compact('class'));
+    }
+
+    public function exportClassReportCards($classId)
+    {
+        $class = SchoolClass::with([
+            'homeroomTeacher', // Explicitly include the homeroom teacher
+            'students.reportCards' => function ($query) {
+                $query->latest();
+            },
+            'students.reportCards.reportDetails.subject'
+        ])->findOrFail($classId);
+
+        // Debug the homeroom teacher info
+        Log::info('HomeRoom Teacher', [
+            'class_id' => $class->id,
+            'teacher_id' => $class->homeroom_teacher_id,
+            'teacher' => $class->homeroomTeacher ? $class->homeroomTeacher->name : 'Not found'
+        ]);
+
+        $predikat = Predikat::orderBy('nilai_min', 'desc')->get();
+
+        // Pre-calculate predicates for each score
+        foreach ($class->students as $student) {
+            if ($student->reportCards->isNotEmpty()) {
+                foreach ($student->reportCards->first()->reportDetails as $detail) {
+                    $detail->knowledgePredicate = Predikat::getPredikatFromNilai($detail->score_knowledge);
+                    $detail->skillPredicate = Predikat::getPredikatFromNilai($detail->score_skill);
+                }
+            }
+        }
+
+        $pdf = Pdf::loadView('reportcard.export-pdf', compact('class', 'predikat'));
+        return $pdf->download('report-cards-' . $class->name . '.pdf');
     }
 }

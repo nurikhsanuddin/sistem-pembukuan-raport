@@ -4,6 +4,7 @@
         <tr>
             <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Nilai</th>
             <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Predikat</th>
+            <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">Deskripsi</th>
             <th class="px-6 py-3 bg-gray-50 font-medium text-gray-900">action</th>
         </tr>
     </thead>
@@ -11,8 +12,9 @@
 
         @foreach ($predikats as $predikat)
             <tr class="hover:bg-gray-50">
-                <td class="px-6 py-4">{{ $predikat->nilai }}</td>
+                <td class="px-6 py-4">{{ $predikat->nilai_min }} - {{ $predikat->nilai_max }} </td>
                 <td class="px-6 py-4">{{ $predikat->predikat }}</td>
+                <td class="px-6 py-4">{{ $predikat->deskripsi }}</td>
                 <td class="px-6 py-4">
                     <div class="flex space-x-2">
                         <a href="{{ route('predikat.edit', $predikat) }}"

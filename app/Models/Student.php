@@ -9,7 +9,7 @@ class Student extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_no', 'name'];
+    protected $fillable = ['student_no', 'name', 'nisn'];
     protected $appends = ['current_class'];
 
     /**
