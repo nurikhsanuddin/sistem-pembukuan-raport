@@ -29,6 +29,7 @@
     </x-slot>
 
     <div class="py-12">
+
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg">
@@ -134,6 +135,11 @@
                         </div>
                     @endif
                 </div>
+            </div>
+            <div class="mt-2">
+                <span class=" italic">NB : Halaman ini berupakan perpustakaan untuk file pdf yang tidak terkait dengan
+                    modul
+                    apapun</span>
             </div>
         </div>
     </div>
