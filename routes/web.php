@@ -5,11 +5,16 @@ use App\Http\Controllers\HomeroomTeacherController;
 use App\Http\Controllers\MapelController;
 use App\Http\Controllers\PredikatController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportPdfController;
 use App\Http\Controllers\SemesterController;
 use Illuminate\Support\Facades\Route;
 
+// Route::get('/', function () {
+//     return view('login');
+// });
+
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth/login');
 });
 
 Route::get('/dashboard', function () {
@@ -32,6 +37,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reportcard/upload', [ReportCardController::class, 'showUploadForm'])->name('reportcard.upload');
     Route::post('/reportcard/import', [ReportCardController::class, 'import'])->name('reportcard.import');
+
+    // Route::get('/reportpdf/upload', [ReportPdfController::class, 'showUploadForm'])->name('reportpdf.upload');
+    // Route::post('/reportpdf/import', [ReportPdfController::class, 'import'])->name('reportpdf.import');
 
     // Class routes
     Route::get('/classes/create', [ClassController::class, 'create'])->name('classes.create');
@@ -87,6 +95,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reportcard/class/{classId}/export-class', [ReportCardController::class, 'exportClassReportCards'])
         ->name('reportcard.export-class');
+
+    // Report PDF Routes
+    Route::prefix('reportpdf')->name('reportpdf.')->group(function () {
+        Route::get('/', [ReportPdfController::class, 'index'])->name('index');
+        Route::get('/upload', [ReportPdfController::class, 'showUploadForm'])->name('upload');
+        Route::post('/import', [ReportPdfController::class, 'import'])->name('import');
+        Route::get('/download/{reportpdf}', [ReportPdfController::class, 'download'])->name('download');
+        Route::delete('/{reportpdf}', [ReportPdfController::class, 'destroy'])->name('destroy');
+    });
 });
 
 
