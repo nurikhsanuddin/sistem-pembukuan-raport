@@ -28,6 +28,9 @@ cd sispem-raport
 ```bash
 composer install --optimize-autoloader --no-dev
 ```
+```bash
+npm install
+```
 
 ### 3. Konfigurasi Environment
 
