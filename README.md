@@ -1,66 +1,203 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Instalasi Sistem Pembukuan Raport (Laravel 12)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Berikut adalah panduan instalasi untuk Sistem Pembukuan Raport berbasis Laravel 12 untuk berbagai lingkungan deployment.
 
-## About Laravel
+## Persyaratan Sistem
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP 8.1 atau lebih baru
+- Composer 2.2+
+- Database:
+  - MySQL 8.0+ 
+  - MariaDB 10.5+
+  - PostgreSQL 13+
+  - SQLite 3.35+
+- Ekstensi PHP wajib:
+  - BCMath, Ctype, cURL, DOM, Fileinfo, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Instalasi
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Clone Repository
 
-## Learning Laravel
+```bash
+git clone https://github.com/username/repository.git sispem-raport
+cd sispem-raport
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 2. Install Dependencies
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+composer install --optimize-autoloader --no-dev
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 3. Konfigurasi Environment
 
-## Laravel Sponsors
+Salin file environment contoh dan sesuaikan:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+```
 
-### Premium Partners
+Edit file `.env` dengan konfigurasi database Anda:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sispem_raport
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Contributing
+### 4. Generate Application Key
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan key:generate
+```
 
-## Code of Conduct
+### 5. Migrasi Database
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Jalankan migrasi dan seeder:
 
-## Security Vulnerabilities
+```bash
+php artisan migrate --seed
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 6. Optimasi Aplikasi
 
-## License
+```bash
+php artisan optimize
+php artisan view:cache
+php artisan event:cache
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 7. Konfigurasi Storage Link
+
+```bash
+php artisan storage:link
+```
+
+## Konfigurasi Web Server
+
+### Apache
+
+Pastikan file `.htaccess` ada di root project dan konfigurasi Apache:
+
+```
+<VirtualHost *:80>
+    ServerName sispem.test
+    DocumentRoot "/path/to/sispem-raport/public"
+    
+    <Directory "/path/to/sispem-raport/public">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name sispem.test;
+    root /path/to/sispem-raport/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+## Penggunaan Development
+
+Untuk environment development:
+
+```bash
+php artisan serve
+```
+
+Atau dengan Hot Reload:
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+npm run dev
+```
+
+## Credential Default
+
+**Admin:**
+- Email: admin@sispem.id
+- Password: admin123
+
+**Guru:**
+- Email: guru@sispem.id
+- Password: guru123
+
+**Siswa:**
+- Email: siswa@sispem.id
+- Password: siswa123
+
+## Environment Variables Penting
+
+| Variable           | Contoh Value          | Keterangan                     |
+|--------------------|-----------------------|--------------------------------|
+| APP_ENV            | production            | Environment aplikasi           |
+| APP_DEBUG          | false                 | Mode debug                     |
+| APP_URL            | https://raport.app    | URL aplikasi                   |
+| LOG_CHANNEL        | stack                 | Channel logging                |
+| DB_CONNECTION      | mysql                 | Koneksi database               |
+| BROADCAST_DRIVER   | log                   | Driver broadcasting            |
+| CACHE_DRIVER       | file                  | Driver cache                   |
+| QUEUE_CONNECTION   | sync                  | Koneksi queue                  |
+| SESSION_DRIVER     | file                  | Driver session                 |
+| SESSION_LIFETIME   | 120                   | Masa aktif session (menit)     |
+
+## Troubleshooting
+
+**Error 500 setelah instalasi:**
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan view:clear
+chmod -R 775 storage bootstrap/cache
+```
+
+**Error migrasi:**
+Pastikan versi database sesuai dan user database memiliki hak akses yang cukup.
+
+**Error composer:**
+Update composer:
+```bash
+composer self-update
+composer install --no-scripts
+```
+
+## Kontribusi
+
+1. Fork project
+2. Buat branch fitur (`git checkout -b fitur-baru`)
+3. Commit perubahan (`git commit -am 'Tambahkan fitur baru'`)
+4. Push ke branch (`git push origin fitur-baru`)
+5. Buat Pull Request
+
+## Lisensi
+
+Proyek ini dilisensikan di bawah [MIT License](LICENSE).
